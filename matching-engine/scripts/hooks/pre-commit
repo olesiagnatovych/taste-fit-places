@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Real-data validation gate: .html/.jsx/.tsx files with unverified place/list
+# name values (matching-engine/scripts/validate-real-data.js). Place names are
+# checked against Places API (New); list names against the owner's Takeout
+# lists when that folder exists (it is not in this public repo).
+# The private build runs two more checks in this hook (a cost-disclosure linter
+# and a stale-term sweep). Both check private log files that are not in this
+# repo, so they are left out here; docs/how-i-build-with-ai.md describes them.
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT"
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+FAILED=0
+
+# The check script below is a tracked file that only exists on branches
+# that include it — the hook itself is installed to .git/hooks/, which is
+# local and not branch-specific. On an older/unrelated branch, skip with a
+# clear warning rather than crash (MODULE_NOT_FOUND) and block every commit.
+
+FILES=$(echo "$STAGED" | grep -E '\.(html|jsx|tsx)$' || true)
+if [ -n "$FILES" ]; then
+  if [ ! -f matching-engine/scripts/validate-real-data.js ]; then
+    echo "pre-commit hook: skipped real-data validation — matching-engine/scripts/validate-real-data.js doesn't exist on this branch."
+  else
+    while IFS= read -r f; do
+      [ -f "$f" ] || continue
+      echo "Validating $f against real place data..."
+      if ! node matching-engine/scripts/validate-real-data.js takeout-export "$f"; then
+        FAILED=1
+      fi
+    done <<< "$FILES"
+  fi
+fi
+
+if [ "$FAILED" -ne 0 ]; then
+  echo ""
+  echo "Commit blocked: see flagged issue(s) above."
+  exit 1
+fi
+
+exit 0

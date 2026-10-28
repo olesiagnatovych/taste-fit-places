@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Blocks commits whose message is identical or near-identical (>=90%
+# similarity) to any of the last 10 commit messages — catches reusing a
+# prior commit message instead of writing one for the actual diff.
+# Check itself: matching-engine/scripts/check-commit-msg.js
+#
+# MOVED HERE FROM commit-msg, 2026-09-24 — real, confirmed gap: the
+# commit-msg hook only ever receives one argument (the message-file path),
+# with no way to tell "amending commit X, message intentionally left
+# unchanged via --no-edit" apart from "a genuinely new commit whose message
+# happens to reuse an old one" — at commit-msg time, `git log -n 10` still
+# includes the commit currently being amended (HEAD hasn't moved yet), so
+# every `git commit --amend --no-edit` was blocked as "IDENTICAL to
+# <itself>" — a real false positive, not the case this check exists to
+# catch. prepare-commit-msg is the right hook for this: git passes it a
+# real, documented second/third argument — commit SOURCE ("message" for
+# -m/-F, "template", "merge", "squash", or "commit" for -c/-C/--amend) and,
+# only when source is "commit", the SHA1 of the commit being amended/copied
+# from (confirmed live: `--amend` does NOT set ORIG_HEAD in this git
+# version, 2.50.1, so that was checked and ruled out as a signal first).
+# check-commit-msg.js now uses that SHA to exclude specifically the commit
+# being amended from its comparison set — not the whole history, so a
+# message that happens to also match some OTHER of the last 10 commits is
+# still correctly flagged.
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT"
+
+# Same real reasoning as the old commit-msg hook had — a tracked check
+# script that only exists on branches that include it; skip with a clear
+# warning on older/unrelated branches rather than crash every commit.
+if [ ! -f matching-engine/scripts/check-commit-msg.js ]; then
+  echo "prepare-commit-msg hook: skipped — matching-engine/scripts/check-commit-msg.js doesn't exist on this branch."
+  exit 0
+fi
+
+# $2 = commit source ("message"/"template"/"merge"/"squash"/"commit" — see
+# githooks(5)), $3 = SHA1 of the commit being amended/copied from, present
+# only when $2 is "commit". Real, deliberate: this check's own purpose
+# (catching genuinely reused messages) doesn't apply to "merge"/"squash"
+# sources at all — those messages are git-generated, not hand-written, and
+# comparing them against recent history would produce real, meaningless
+# noise (a merge commit's message legitimately looks like past merges).
+if [ "$2" = "merge" ] || [ "$2" = "squash" ]; then
+  exit 0
+fi
+
+# Real, confirmed-live gap: git does NOT always pass a resolved 40-char
+# SHA1 as $3 — for a plain `git commit --amend`, it passes the literal
+# string "HEAD" (confirmed via direct hook-arg tracing, 2026-09-24, this
+# exact fix), not the commit it resolves to. check-commit-msg.js compares
+# against real, full SHAs from `git log --pretty=format:%H`, so an
+# unresolved "HEAD" (or any other ref form git might pass — a short SHA
+# from `-c`/`-C`, say) would never match and silently fail to exclude
+# anything. Resolve it here, once, before handing it to the JS check.
+amendSha=""
+if [ -n "$3" ]; then
+  amendSha=$(git rev-parse "$3" 2>/dev/null || echo "")
+fi
+
+node matching-engine/scripts/check-commit-msg.js "$1" "$2" "$amendSha"

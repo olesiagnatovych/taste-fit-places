@@ -1,0 +1,28 @@
+/* Real, minimal global reset (2026-09-24) — ported from the confirmed-final mockups' own
+   global rules (discover-v1-launch-FINAL.html / discover-error-state-category-FINAL.html),
+   split out from page.module.css because these two specific rules are genuinely global (not
+   page-scoped CSS Modules can't target `*`/`html`/`body` at all) and real, not optional: without
+   box-sizing:border-box, page.module.css's .content (padding + min-height:100vh) pushes the
+   real page taller than the viewport, causing an unwanted scroll on load — caught live via a
+   direct DOM measurement during this task's own browser test, not assumed.
+
+   Deliberately NOT ported here: the mockups' `body{font-family:'Inter',...}` — that would
+   silently change the admin page's font too (not in this repo), a page this task never touched. Kept scoped to the real
+   homepage instead — see page.module.css's .page rule. */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  /* Real fix, 2026-10-01 — Task 92/0d3b753's viewport-fit:"cover" (layout.tsx) only opts the
+     page into Safari's safe-area region; it doesn't paint it. With no background on html/body,
+     the browser's default white shows through in exactly the notch and home-indicator strips —
+     confirmed live on a real iPhone (16 Pro Max, iOS Safari) after that commit shipped as
+     "reasoned but unverified." height:100% + a real background matching .scrim's own dark tone
+     (page.module.css, rgba(24, 22, 20, ...) -> #181614) closes both gaps: this fallback paints
+     edge-to-edge into the safe areas even before .page's own background/image has laid out. */
+  height: 100%;
+  background: #181614;
+}

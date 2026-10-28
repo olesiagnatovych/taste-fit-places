@@ -1,0 +1,415 @@
+/* Alternative homepage (/alt) — ported from UI/Alt-Home-Mockup/home_real.html. The real homepage's
+   own rules (app/page.module.css) are untouched; the search bar, headline, photo overlay and the
+   480px breakpoint are the same values, copied here so this page is self-contained. */
+
+@font-face {
+  font-family: "Handwriting";
+  src: url("/fonts/Myfont4-Regular.ttf") format("truetype");
+}
+
+.page {
+  --red: #e5322d;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Mockup: 24px / max(16px, safe-area-left). Top and bottom also respect the notch and home
+     indicator, same reason as the real homepage's safe-area padding. */
+  padding: max(24px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-left, 0px)) max(24px, env(safe-area-inset-bottom, 0px));
+  font-family: "Inter", sans-serif;
+}
+
+.bgImage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 58% 50%;
+}
+
+/* Error state's alternate photo treatment — same values as the real homepage. */
+.bgImageError {
+  object-position: 50% 90%;
+  transform: scale(1.3);
+  transform-origin: 50% 85%;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 22, 20, 0.28);
+}
+
+.scrimError {
+  background: rgba(24, 22, 20, 0.32);
+}
+
+.overlayBlack {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.headline {
+  position: relative;
+  z-index: 2;
+  font-family: "Handwriting", cursive;
+  font-size: 56px;
+  line-height: 1.15;
+  color: #fff;
+  text-align: center;
+  margin: 0 0 28px;
+  font-weight: normal;
+}
+
+.headlineError {
+  font-size: 60px;
+  line-height: 1.1;
+}
+
+.searchRow {
+  position: relative;
+  z-index: 2;
+  width: 90%;
+  max-width: 620px;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.searchBar {
+  flex: 1;
+  position: relative;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 28px;
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+  transition: background 0.2s;
+}
+
+/* Open: the bar dims, the active field turns into a solid raised pill (see .field.active). */
+.searchBar.open {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.field {
+  position: relative;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  border-radius: 28px;
+  transition: background 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+
+/* Hover: the field under the mouse gets a lighter pill, and the divider hides. */
+.field:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.searchBar.open .field:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.field.active,
+.searchBar.open .field.active:hover {
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+}
+
+.divider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.35);
+  margin: 10px 0;
+  transition: opacity 0.15s;
+}
+
+.searchBar:has(.field:hover) .divider,
+.searchBar.open .divider {
+  opacity: 0;
+}
+
+.fieldInput {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  color: #4a453d;
+  font-style: normal;
+}
+
+.fieldInput::placeholder {
+  color: #4a453d;
+  opacity: 1;
+  font-style: normal;
+}
+
+.fieldInputError,
+.fieldInputError::placeholder {
+  font-style: italic;
+}
+
+/* Search button: white, red icon; grows to icon + "search" while the bar is open. */
+.goBtn {
+  background: #fff;
+  color: var(--red);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  align-self: center;
+  gap: 0;
+  transition: width 0.2s, border-radius 0.2s;
+  overflow: hidden;
+}
+
+.goBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.goBtn svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.goBtn span {
+  max-width: 0;
+  opacity: 0;
+  white-space: nowrap;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  transition: max-width 0.2s, opacity 0.2s, margin 0.2s;
+}
+
+.searchRow.open .goBtn {
+  width: auto;
+  border-radius: 22px;
+  padding: 0 18px 0 14px;
+}
+
+.searchRow.open .goBtn span {
+  max-width: 80px;
+  opacity: 1;
+  margin-left: 8px;
+}
+
+/* Dropdown under the active field. */
+.panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 10;
+  width: min(340px, 86vw);
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  padding: 18px 12px 12px;
+  cursor: default;
+}
+
+.panel h3 {
+  margin: 0 0 8px 12px;
+  font: 600 12px "Inter", sans-serif;
+  color: #4a453d;
+}
+
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #2d2a25;
+}
+
+.opt:hover {
+  background: #f4f1ea;
+}
+
+.tile {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #fbf8ec;
+  display: grid;
+  place-items: center;
+}
+
+.tile svg {
+  width: 34px;
+  height: 34px;
+  overflow: visible;
+}
+
+.tile .stroke {
+  stroke-width: 4;
+}
+
+.opt small {
+  display: block;
+  font-size: 12px;
+  color: #7a746a;
+  margin-top: 2px;
+}
+
+.none {
+  margin: 6px 12px 10px;
+  font: 13px "Inter", sans-serif;
+  color: #7a746a;
+}
+
+/* Scattered drawings: red lines drawn directly on the photo, no backgrounds. */
+.stroke {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.patch {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--red);
+  pointer-events: none;
+  /* Hidden until the placement pass has positioned it, so nothing flashes at 0,0. */
+  visibility: hidden;
+  transition: opacity 0.25s;
+}
+
+.patch[data-placed] {
+  visibility: visible;
+}
+
+.patchHidden {
+  opacity: 0;
+}
+
+.patch svg {
+  overflow: visible;
+}
+
+.patch span {
+  font-family: "Handwriting", cursive;
+  -webkit-text-stroke: 1.1px var(--red);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .field {
+    padding: 12px 10px;
+  }
+
+  /* 16px, not smaller: iOS Safari zooms the page on focus for any input under 16px. The field's
+     side padding was cut from 14px to 10px to give the larger text room in the narrow bar. */
+  .fieldInput {
+    font-size: 16px;
+  }
+
+  .bgImage {
+    object-position: 28% 50%;
+  }
+
+  .bgImageError {
+    object-position: 30% 90%;
+  }
+
+  /* The mockup right-aligned the location dropdown to its (very narrow) field, which pushed it off
+     the left edge of the screen at 375px. On narrow screens both dropdowns are anchored to the
+     search bar instead (the field stops being positioned; the bar is the containing block) and
+     get a width that always fits the screen. */
+  .field {
+    position: static;
+  }
+
+  .panel {
+    left: 0;
+    width: min(300px, calc(100vw - 32px));
+  }
+}
+
+/* Message slots, same as the real homepage. */
+.messageRow {
+  position: relative;
+  z-index: 2;
+  width: 90%;
+  max-width: 560px;
+  margin-top: 6px;
+}
+
+.errorText {
+  font-family: "Inter", sans-serif;
+  font-style: italic;
+  font-size: 11.5px;
+  color: #b23a3a;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.plainMessage {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  color: #fff;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Results list sits below the hero on an opaque background, because the photo layers are
+   position: fixed (same arrangement as the real homepage). */
+.resultsArea {
+  position: relative;
+  z-index: 1;
+  padding: 2rem 1.5rem;
+  font-family: system-ui, sans-serif;
+  background: #181614;
+}
+
+/* Progressive results: the hint shown while more cards may still arrive, and the note under cards that
+   stay on screen after a dropped connection or a late error. */
+.stillDigging {
+  margin: 1rem 0 0;
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.streamNotice {
+  margin: 1rem 0 0;
+  font-size: 13px;
+  font-style: italic;
+  opacity: 0.8;
+}

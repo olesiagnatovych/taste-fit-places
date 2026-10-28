@@ -1,0 +1,34 @@
+{
+  "name": "taste-fit-places",
+  "version": "0.2.0",
+  "description": "Taste-Fit Places: taste-fit place recommender (Places API (New) + Gemini Grounding), Next.js app and matching engine.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "tsx src/test-runner.ts",
+    "test:orchestrator": "tsx src/orchestrator-test.ts",
+    "validate:real-data": "node scripts/validate-real-data.js ../takeout-export",
+    "postinstall": "bash scripts/install-hooks.sh",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "@google/genai": "^2.15.0",
+    "@types/pg": "^8.21.0",
+    "dotenv": "^16.6.1",
+    "leven": "^4.1.0",
+    "next": "^16.3.1",
+    "pg": "^8.23.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

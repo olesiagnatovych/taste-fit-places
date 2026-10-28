@@ -1,0 +1,314 @@
+/* Real, ported styles (2026-09-24) — from the real, confirmed-final mockups:
+   discover-v1-launch-FINAL.html and discover-error-state-category-FINAL.html
+   (private design mockups, not in this repo).
+   Both mockups shared the exact same base structure (page/scrim/overlay/content/searchRow) with
+   two real, deliberate differences: the background photo's object-position/scale, and the
+   scrim opacity (0.28 idle vs 0.32 error) — both ported as separate classes below, applied
+   conditionally in page.tsx based on real search outcome, not invented here.
+
+   Asset paths changed from the mockups' relative `../photos/...` / `../font/...` (correct for a static file opened directly, broken for a real Next.js page) to
+   real /images/... and /fonts/... — copied into matching-engine/public/ (Next's real static-
+   asset convention), not left as broken relative paths. */
+
+@font-face {
+  font-family: "Handwriting";
+  src: url("/fonts/Myfont4-Regular.ttf") format("truetype");
+}
+
+.page {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  /* Real fix, 2026-09-26 — direct report, real iPhone (16 Pro Max, iOS Safari): a visible
+     white gap above the hero photo. Root cause: 100vh on Safari measures the LARGEST possible
+     viewport (as if the address-bar/toolbar chrome were fully hidden), not the actual visible
+     one — a real, well-documented Safari-specific behavior this project's own testing tools
+     (Chromium-based, no real iOS Safari available here) don't reproduce. 100dvh is the
+     standard fix — the dynamic viewport unit that tracks Safari's real, current visible area as
+     its chrome shows/hides. Kept the 100vh line above as a fallback for browsers that don't
+     support dvh yet; a supporting browser uses this line instead, since it comes second.
+     Paired with layout.tsx's own viewportFit:"cover" fix for the safe-area half of this. */
+  min-height: 100dvh;
+  overflow: hidden;
+  /* Scoped here, not global.css — a real, deliberate choice not to change the admin page's font too (the admin page is not in this repo)
+     (see globals.css's own comment for the full reasoning). */
+  font-family: "Inter", sans-serif;
+}
+
+/* Real fix, 2026-10-01 (Task 94's own follow-up, same day as reported): Task 94 closed the WHITE
+   gap (html/body now paint #181614 edge-to-edge, confirmed — that's exactly why the gap is now
+   dark instead of white), but confirmed live on a real device that the gap itself is still
+   there — the HERO IMAGE never reached the safe-area strips, only the solid fallback behind it
+   did. Root cause, verified directly (not guessed): the live HTML's viewport meta tag DOES
+   correctly emit `viewport-fit=cover` (checked via curl against the rendered page) — so that
+   wasn't it. These three layers were `position: absolute; inset: 0`, sized against `.page`'s own
+   box (`.page` is their nearest positioned ancestor) — and `.page`'s own `100dvh` apparently does
+   NOT reliably extend to the true physical screen height on this real device/Safari version,
+   despite viewport-fit=cover (the html/body canvas-level background DOES reach the true edges —
+   a separate, spec-guaranteed mechanism, CSS2.1 "canvas background" propagation — which is why
+   that part worked but this part didn't). `position: fixed` sidesteps this entirely: a
+   fixed-positioned box's containing block is the true viewport (the ICB), which `viewport-fit=
+   cover` is specifically documented (Apple's own HIG) to extend into the safe area for exactly
+   this pattern — independent of `.page`'s own computed height. Left at the default `z-index:
+   auto` (NOT negative — tried `z-index: -1` first and caught it live, in this same session,
+   before shipping: a well-documented real browser quirk makes a negative-z-index descendant
+   paint BEHIND an ancestor's own background once that ancestor — `html`/`body` here, since Task
+   94 — has an explicit `background-color` set, even outside any stacking context. That silently
+   hid the entire photo behind the new `#181614` fallback. `auto` avoids that trap; `.content`'s
+   own `z-index: 1` still keeps it on top via the normal stacking order, and `.resultsArea` below
+   gets its own explicit `z-index` for the same reason — see that rule.) Real, deliberate side
+   effect, flagged rather than silently shipped: fixed positioning means these layers now stay
+   pinned to the viewport during scroll, instead of scrolling away with `.page` — invisible in
+   practice once the results area is reached, because `.resultsArea` now gets its own opaque,
+   explicitly-stacked background for exactly this reason. */
+.bgImage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 58% 50%;
+}
+
+/* Error state's real photo treatment — different crop/zoom, confirmed via direct visual check
+   (DECISIONS.md) — ported verbatim, not approximated. */
+.bgImageError {
+  object-position: 50% 90%;
+  transform: scale(1.3);
+  transform-origin: 50% 85%;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 22, 20, 0.28);
+}
+
+.scrimError {
+  background: rgba(24, 22, 20, 0.32);
+}
+
+.overlayBlack {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Real fix, 2026-10-01, paired with globals.css's html/body background fix: .page/.bgImage
+     already bleed full-screen into the safe areas (that's the background-gap fix) — this is the
+     separate, content-side half of the same bug. Real CONTENT (headline, search bar) must stay
+     CLEAR of the notch/home-indicator, not just not-clipped by overflow:hidden — env()
+     safe-area-inset-top/bottom (0px fallback for browsers without safe-area support, e.g. non-
+     notched devices/desktop) adds exactly the real reserved inset on top of the existing
+     15vh/4rem spacing, rather than replacing it. */
+  padding: calc(15vh + env(safe-area-inset-top, 0px)) 0 calc(4rem + env(safe-area-inset-bottom, 0px));
+  min-height: 100vh;
+  justify-content: center;
+}
+
+.headline {
+  font-family: "Handwriting", cursive;
+  font-size: 56px;
+  line-height: 1.15;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.headlineError {
+  font-size: 60px;
+  line-height: 1.1;
+}
+
+.searchRow {
+  width: 90%;
+  max-width: 620px;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.searchBar {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 28px;
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+}
+
+.field {
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.divider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.35);
+  margin: 10px 0;
+}
+
+/* Real inputs, not the mockups' static <span>s — this is a functional page. Styled to match
+   .placeholder-text (idle) exactly: same font/size/color, transparent/borderless so it reads as
+   part of the translucent bar, not a visibly separate form control. */
+.fieldInput {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  color: #4a453d;
+  font-style: normal;
+}
+
+.fieldInput::placeholder {
+  color: #4a453d;
+  opacity: 1;
+  font-style: normal;
+}
+
+/* Real, confirmed-final detail from discover-error-state-category-FINAL.html: the search bar's
+   own text renders italic specifically in the category-no-match error state (.field-text there)
+   — ported as a modifier applied to the same real input, not a second, static-only version. */
+.fieldInputError,
+.fieldInputError::placeholder {
+  font-style: italic;
+}
+
+.goBtn {
+  background: #e025fa;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.goBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.goBtn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Real, confirmed mobile bug (2026-09-26), direct report + reproduced in this project's own
+   testing tools at 375/390/430px (the real range mentioned, iPhone 16 Pro Max's real 430px
+   width included): the two side-by-side .field inputs shrink so far (via their own flex:1/
+   min-width:0, correctly not overflowing the viewport — confirmed docScrollWidth === innerWidth
+   at every width tested) that the real placeholder copy ("type what you're looking for") gets
+   clipped mid-word inside the input.
+   CORRECTED 2026-09-26, same day — first attempt stacked the two fields vertically, which
+   fixed the clipping but broke the actual locked design (a single pill with a vertical divider
+   at every width, confirmed against the real mockup — a two-row layout with a horizontal line
+   is a different component, not the same bar narrower). Real, checked-before-choosing math: at
+   375px, even near-zero field padding leaves only ~133px per field — nowhere near enough for
+   the full 29-character "type what you're looking for" string at any legible font size. Padding/
+   font-size reduction ALONE cannot fit that specific string in a 2-up pill this narrow — real,
+   computed, not guessed. Real fix instead, keeping the pill/divider structure fully intact at
+   every width: (1) modest padding/font-size reduction below 480px, small enough to stay
+   legible/tappable; (2) the category field's placeholder shortens to "looking for" ONLY below
+   480px (page.tsx, a real `useMediaQuery`-style listener — CSS alone can't change native
+   placeholder text) — same real field, same pill, same divider, just less copy where physical
+   space genuinely doesn't allow more. The location field's own placeholder ("add location") was
+   never actually clipped at any tested width and is left unchanged. */
+@media (max-width: 480px) {
+  .field {
+    padding: 12px 14px;
+  }
+
+  .fieldInput {
+    font-size: 12px;
+  }
+
+  /* Task 98 (2026-10-02), the confirmed "option 1" from Task 96: same source photos, a
+     separate mobile object-position per hero, same 480px breakpoint as the rules above — no new
+     assets. Why a separate value is needed at all: at phone aspect ratios `cover` crops left/
+     right instead of top/bottom (Task 96: ~62% of the idle photo's width is visible), so the
+     single desktop 58%/50% pans the window past the subject. Tuned by eye in the browser, not
+     computed: idle -> 28% 50% keeps the smiley balloon fully in frame just below the search bar
+     (it sits ~24-34% across the source photo) while still showing some of the tree at right;
+     error -> 30% 90% (vertical 90% and the scale/origin on .bgImageError are unchanged, so only
+     the horizontal pan moves) brings the rose cluster into the visible window instead of mostly
+     chain-link and the rust sign. .bgImageError must stay AFTER .bgImage here: same specificity,
+     so source order is what makes the error value win when both classes are applied. */
+  .bgImage {
+    object-position: 28% 50%;
+  }
+
+  .bgImageError {
+    object-position: 30% 90%;
+  }
+}
+
+/* Real, ported from the error mockup's .error-row/.error-text — the one designed message slot
+   this project has. Reused (not redesigned) for the non-error in-progress states (loading,
+   geolocation permission) too, since no separate design exists for those — kept plain/neutral
+   there rather than inventing a new visual treatment (CLAUDE.md rule 14). */
+.messageRow {
+  width: 90%;
+  max-width: 560px;
+  margin-top: 6px;
+}
+
+.errorText {
+  font-family: "Inter", sans-serif;
+  font-style: italic;
+  font-size: 11.5px;
+  color: #b23a3a;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.plainMessage {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  color: #fff;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Real, deliberate: no design exists yet for a results list (DECISIONS.md, 2026-08-19 —
+   "no results-page/results-list design exists yet, everything built so far is homepage-only").
+   ResultsList.tsx itself is untouched/unstyled per direct instruction; this just gives it a
+   plain, readable spot in normal document flow below the real hero, rather than clipping it
+   inside the hero's overflow:hidden.
+   Real addition, 2026-10-01, direct consequence of .bgImage/.scrim/.overlayBlack switching to
+   `position: fixed` above — not a new design choice, a correctness requirement: those layers now
+   stay pinned to the viewport during scroll instead of scrolling away with .page. They're left at
+   `z-index: auto` (see their own comment — negative z-index silently hid them behind html/body's
+   background instead), which means, per normal CSS stacking order, they'd otherwise paint ABOVE
+   this box's own plain in-flow content (a non-positioned box's content paints below any
+   positioned-with-z-index sibling, even z-index:auto ones) — so this box needs `position:
+   relative; z-index: 1` of its own (same tier as `.content`, correct either way since the two
+   never appear on screen at once) to reliably paint on top, PLUS an opaque background so the
+   whole box actually occludes the fixed hero with no transparent gaps, not just wherever its own
+   content happens to paint. Reused, not invented: same #181614 already established as the real
+   canvas fallback (globals.css, Task 94) — not a new color. */
+.resultsArea {
+  position: relative;
+  z-index: 1;
+  padding: 2rem 1.5rem;
+  font-family: system-ui, sans-serif;
+  background: #181614;
+}

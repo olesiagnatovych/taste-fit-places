@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/verify-subagent-claim.sh\"",
+            "statusMessage": "Checking subagent conclusion for a verbatim source quote (CLAUDE.md rule 5)..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/verify-decision-attribution.py\"",
+            "statusMessage": "Checking for unverified reasoning attributed to the product owner..."
+          }
+        ]
+      }
+    ]
+  }
+}

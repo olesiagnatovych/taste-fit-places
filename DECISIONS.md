@@ -2,7 +2,13 @@
 
 The main product and technical calls behind Taste-Fit Places. Each one follows the same shape: **context → options → call → trade-off → evidence.**
 
-Labels: **MEASURED** = counted in a logged test run. **STATED** = my own experience or judgment, not a controlled test. Task numbers refer to the private experiment log, which is summarized in [docs/experiments.md](docs/experiments.md).
+Labels:
+
+- **MEASURED**: counted in a logged test run.
+- **CHECKED**: counted against a dated record, such as my pre-build Google Takeout list. The judgment of fit is mine.
+- **FROM MY USE**: from my own use of the app; it varies by category and neighborhood. Not a controlled test.
+
+Task numbers refer to the private experiment log, which is summarized in [docs/experiments.md](docs/experiments.md).
 
 ---
 
@@ -18,7 +24,7 @@ Labels: **MEASURED** = counted in a logged test run. **STATED** = my own experie
 
 **Trade-off.** A taste profile has to be written and kept up to date. That is real work, and it only covers the categories I have written profiles for (5 today).
 
-**Evidence.** 40% more fitting places than my manual search (2 new on top of 5), Lower East Side, my own check on 2026-10-28 (STATED).
+**Evidence.** 40% more fitting places than my manual search (2 new on top of 5), Lower East Side, my own check on 2026-10-28 (FROM MY USE).
 
 ---
 
@@ -104,7 +110,7 @@ A related trade-off: an earlier experiment measured ~5x faster and ~68% cheaper 
 
 **Trade-off.** I accept some platform risk to keep a usable product. If Google rules against this, the results screen has to change.
 
-**Evidence.** The question was researched against the published terms and logged as unresolved (STATED). The decision is not a default that happened by not thinking about it.
+**Evidence.** The question was researched against the published terms and logged as unresolved (my reading of Google's published terms). The decision is not a default that happened by not thinking about it.
 
 ---
 
@@ -120,7 +126,7 @@ A related trade-off: an earlier experiment measured ~5x faster and ~68% cheaper 
 
 **Trade-off.** The built work is thrown away. That was a sunk cost; keeping a rule on evidence I no longer trusted would have been worse.
 
-**Evidence.** The only grounding for the rule was one remembered place (STATED). One weak example is not enough to keep a rule that changes results for a whole region.
+**Evidence.** The only grounding for the rule was one remembered place. One weak example is not enough to keep a rule that changes results for a whole region.
 
 ---
 

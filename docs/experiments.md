@@ -1,6 +1,10 @@
 # Key experiments
 
-Each experiment: **question → method → result.** Labels: **MEASURED** = counted in a logged test run. **STATED** = my own experience, not a controlled test.
+Each experiment: **question → method → result.** Labels:
+
+- **MEASURED**: counted in a logged test run.
+- **CHECKED**: counted against a dated record, such as my pre-build Google Takeout list. The judgment of fit is mine.
+- **FROM MY USE**: from my own use of the app; it varies by category and neighborhood. Not a controlled test.
 
 The private experiment log runs to Task 110 (MEASURED). Logged entries start at Task 19. The scripts behind these experiments used real places, so they are summarized here, not copied.
 

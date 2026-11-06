@@ -10,11 +10,15 @@ Demo on request.
 
 ## The problem
 
-Google's "good place" isn't mine, and mine isn't the crowd's.
+Google Maps has always been my directory and my navigator. I save places there, I plan trips there, and I use it to discover new places, because it has reviews, photos, and I can see where everything is relative to where I'm staying.
 
-I look for natural wine (cloudy, funky, sometimes "weird") and for relaxed, human service, where the staff are themselves and nobody performs. Many people rate exactly these things down. Ratings and review counts push niche places below popular, well-marketed ones. So the places I want are often the hardest ones to find.
+But discovering places that fit my taste takes a lot of time. A restaurant, a wine bar, a gallery, a beach, a park. And I found out why: the algorithm works against me.
 
-Before this app, I solved it by hand. I read reviews, looked at photos and cross-checked lists, for every trip and every new neighborhood.
+First, Google ranks by popularity. Places with high ratings and lots of reviews win, and they bury excellent places that fit my profile.
+
+Second, people just have different taste. Not better or worse, different. A secluded beach with a long walk is bad for someone. For me, it means wild, secluded in a good way. Cloudy natural wine with unusual flavors is strange and unpleasant for some people. For me, it's exactly what I'm looking for. So the places I'd rate high get lower ratings from others, and Google ranks them even lower.
+
+That's why I built this: to find places by my taste, not the crowd's. And it sends me back to Google Maps, because that's still where I save and navigate.
 
 ## Two user goals
 
@@ -27,17 +31,19 @@ The full user problem is in [docs/user-problem.md](docs/user-problem.md).
 
 | What | Result | Label |
 |---|---|---|
-| Time to find a place that fits | 30 → 5–10 minutes | STATED, my own use |
-| Discovery | 40% more fitting places than my manual search (2 new on top of 5), Lower East Side, my own check on 2026-10-28 | STATED |
+| Time to find a place that fits | Manual research: about 30 minutes per place. With the app: a search takes 14–43 s (MEASURED, 3 logged searches in 2 categories, POC-Log Tasks 105, 106, 110), and choosing from the results takes about 5–10 minutes. | Manual and choosing: FROM MY USE. Search time: MEASURED |
+| Discovery | 40% more fitting places than my manual search (2 new on top of 5), Lower East Side, my own check on 2026-10-28 | FROM MY USE |
 | Model failures on the scoring call | 37.5% (3 of 8) → 0 of 23 after the root-cause fix | MEASURED |
 | Review quotes after the paraphrase-only rule | 0 quotation marks across 14 live calls | MEASURED |
 | Categories in the search path | 5: coffee, wine, art, sushi, pizza | — |
 
-**MEASURED** = counted in a logged test run. **STATED** = my own experience, not a controlled test.
+- **MEASURED**: counted in a logged test run.
+- **CHECKED**: counted against a dated record, such as my pre-build Google Takeout list. The judgment of fit is mine.
+- **FROM MY USE**: from my own use of the app; it varies by category and neighborhood. Not a controlled test.
 
 ## How it works
 
-Two Google services do the work. **Grounding with Google Maps** means Gemini answers using Google Maps data and cites the places it used. **Places API (New)** is Google's structured place data: name, rating, price, opening hours.
+Three Google services do the work. The **Geocoding API** turns the location text into coordinates. **Grounding with Google Maps** means Gemini answers using Google Maps data and cites the places it used. **Places API (New)** is Google's structured place data: name, rating, price, opening hours.
 
 1. **Find.** Gemini, with Grounding with Google Maps, suggests real places near the location for the category.
 2. **Check.** Places API (New) looks up each place. For food categories, Google's own server drops places rated below 4.0 and the most expensive price tier. The app requests no review text and stores no Google place content, only place IDs.

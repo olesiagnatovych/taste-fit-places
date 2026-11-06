@@ -18,15 +18,13 @@ import type { CandidatePlace, SearchCategory, RuleResult, MatchResult } from "./
 // (still 4.0, still the same 2026-07-27 decision) — `search-pipeline.ts` imports it rather
 // than hardcoding a second, driftable `4.0` literal in a different file.
 //
-// REAL, FLAGGED CONSEQUENCE, not silently absorbed: `search-orchestrator.ts` (Pizza's tiered
-// rating-floor relaxation ladder — LEVER1_RATING_FLOOR_TIERS, tiers 4.0/3.8/3.6/relaxed) calls
+// RETIRED after the compliance rebuild: `search-orchestrator.ts` (Pizza's tiered rating-floor
+// relaxation ladder — LEVER1_RATING_FLOOR_TIERS, tiers 4.0/3.8/3.6/relaxed) calls
 // `evaluate(place, category, { ratingFloor: step.ratingFloor })`, and that whole mechanism
 // depended on `ratingFloorRule` actually reading `options.ratingFloor`. With that rule gone,
-// `evaluate()`'s `ratingFloor` option is now genuinely inert — every tier now produces an
-// identical result, since nothing in this file reads the override anymore. Pizza is not a v1
-// launch category and `search-orchestrator.ts` was explicitly out of scope for this pass
-// ("don't touch anything else") — this is a real, live regression to an existing, tested
-// subsystem, not touched or fixed here, flagged so it isn't found by surprise later.
+// `evaluate()`'s `ratingFloor` option is inert — every tier produces an identical result, since
+// nothing in this file reads the override anymore. The ladder is not being rebuilt, and nothing
+// in the live search path uses it. See "Status and what's next" in the README.
 export const RATING_FLOOR = 4.0;
 
 /**

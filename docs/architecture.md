@@ -52,4 +52,7 @@ Schema: [`schema/schema.sql`](../schema/schema.sql).
 ## Not wired yet
 
 - **Discovery merge.** Several generated "niche angles" per search, merged by place ID. Validated in experiments for art and wine, not wired into the live search path.
+
+## Retired
+
 - **Fallback tiers.** Retired: the relaxation ladder in `src/search-orchestrator.ts` became obsolete when rating filtering moved to Google's server in the compliance rebuild. Nothing in the live path uses it.

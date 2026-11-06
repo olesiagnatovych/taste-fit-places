@@ -20,12 +20,12 @@ Second, people just have different taste. Not better or worse, different. A secl
 
 That's why I built this: to find places by my taste, not the crowd's. And it sends me back to Google Maps, because that's still where I save and navigate.
 
-Today the app covers five categories: coffee, wine, art, sushi and pizza.
+Today the app covers five categories: coffee, wine, art, sushi and pizza. Planned for v2: seafood, cafés with real food, breakfast and brunch places, beaches, and outdoors (parks and landmarks). Planned for v3: trip planning.
 
 ## Two user goals
 
 1. **Time to value.** Get to a place that fits in minutes, not after an evening of research.
-2. **Discovery.** Surface places that a normal search doesn't show.
+2. **Discovery.** Surface places that a regular Google search buries, because its ranking favors popular over niche.
 
 The full user problem is in [docs/user-problem.md](docs/user-problem.md).
 
@@ -50,6 +50,18 @@ Three Google services do the work. The **Geocoding API** turns the location text
 2. **Check.** Places API (New) looks up each place. For food categories, Google's own server drops places rated below 4.0 and the most expensive price tier. The app requests no review text and stores no Google place content, only place IDs.
 3. **Judge.** Gemini, with Grounding, scores each place against my taste profile for that category: a clear fit, a possible fit, or not a fit. Each fit comes with a short reason in its own words.
 4. **Decide.** Each result card links to the place in Google Maps. The final call stays with me.
+
+### The matching engine
+
+This is the core of the product, because it replaces popularity as the ranking signal. A high rating or a popular name does not count as evidence of fit.
+
+- **A written taste profile for each category.** Each of the 5 categories has a plain-language profile: what fits, what doesn't, and what is only a caveat. For pizza, deep dish is out, and thick dough is a medium fit with the caveat stated.
+- **A few hard rules, enforced before any judgment.** For food categories, Google's server drops places rated below 4.0 and the most expensive price tier. Art skips both. For sushi, the code drops places whose prices top out at $30 per person or less, because very cheap sushi usually means compromised fish quality; a place with no price data passes.
+- **Everything else is judged, not enforced.** Taste, including the disqualifiers written in the profiles (such as dark roast coffee), is judged by Gemini from what it finds on Google Maps. No code checks these.
+- **Three verdicts: a clear fit, a possible fit, or not a fit.** Gemini chooses one; there is no numeric score. It must first name the strongest evidence against the fit, then the strongest evidence for it, and weigh both. Generic praise alone can't earn a clear fit.
+- **The evidence rule.** Missing evidence counts as insufficient, never as support. Negative evidence must be shown, not dropped.
+- **What reaches the screen.** Places judged not a fit are hidden. If scoring fails after retries, the place is shown as unverified, not given a guessed verdict. The main home page lists clear fits first.
+- **The limits.** The line between a clear and a possible fit is judged by Gemini, not set by a rule. The verdict and evidence rules are instructions to the model, not checks in code.
 
 Diagram and details: [docs/architecture.md](docs/architecture.md).
 
@@ -82,8 +94,10 @@ This public repo is a clean copy with new history. The private repo's logs conta
 ## Status and what's next
 
 - **Working locally:** the search path for all 5 categories, both home pages, spend protection (built and tested locally, not deployed).
-- **Known issue:** a test for an older fallback design (`npm run test:orchestrator`) fails. Rating filtering moved to Google's server, so this code path no longer works. Nothing in the live search path uses it.
+- **Retired:** the fallback ladder in `src/search-orchestrator.ts` became obsolete when rating filtering moved to Google's server in the compliance rebuild. Its old test (`npm run test:orchestrator`) still fails and is kept as a record.
 - **Proposed, not built:** cold start, meaning how a new user without my years of saved places gets a taste profile.
+- **Planned for v2:** seafood, cafés with real food, breakfast and brunch places, beaches, and outdoors (parks and landmarks).
+- **Planned for v3:** trip planning.
 
 ## Run it locally
 

@@ -131,7 +131,7 @@ A related trade-off: an earlier experiment measured ~5x faster and ~68% cheaper 
 
 ## 8. Knowing where the model stops
 
-**Context.** I tested whether the engine could go beyond single places. Could facts that Google has, or a score against my criteria, separate destinations I liked from destinations I would not choose again? I wrote each test's expectations before running it.
+**Context.** I tested whether the engine could go beyond single places. Could facts that Google has, or a score against my criteria, separate destinations I liked from destinations I would not choose again? I wrote each test's expectations before running it. These tests were about choosing a destination to stay in, not finding places near me.
 
 **Options.**
 - Keep spending to tune criteria and descriptions until the scores separate.

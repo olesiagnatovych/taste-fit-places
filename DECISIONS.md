@@ -5,7 +5,6 @@ The main product and technical calls behind Taste-Fit Places. Each one follows t
 Labels:
 
 - **MEASURED**: counted in a logged test run.
-- **CHECKED**: counted against a dated record, such as my pre-build Google Takeout list. The judgment of fit is mine.
 - **FROM MY USE**: from my own use of the app; it varies by category and neighborhood. Not a controlled test.
 
 Task numbers refer to the private experiment log, which is summarized in [docs/experiments.md](docs/experiments.md).

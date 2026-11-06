@@ -20,6 +20,8 @@ Second, people just have different taste. Not better or worse, different. A secl
 
 That's why I built this: to find places by my taste, not the crowd's. And it sends me back to Google Maps, because that's still where I save and navigate.
 
+Today the app covers five categories: coffee, wine, art, sushi and pizza.
+
 ## Two user goals
 
 1. **Time to value.** Get to a place that fits in minutes, not after an evening of research.
@@ -31,14 +33,13 @@ The full user problem is in [docs/user-problem.md](docs/user-problem.md).
 
 | What | Result | Label |
 |---|---|---|
-| Time to find a place that fits | Manual research: about 30 minutes per place. With the app: a search takes 14–43 s (MEASURED, 3 logged searches in 2 categories, POC-Log Tasks 105, 106, 110), and choosing from the results takes about 5–10 minutes. | Manual and choosing: FROM MY USE. Search time: MEASURED |
+| Time to find a place that fits | Manual research: about 30 minutes per place. With the app: a search takes 14–43 s (MEASURED, 3 logged searches in 2 categories, the private experiment log, Tasks 105, 106, 110), and choosing from the results takes about 5–10 minutes. | Manual and choosing: FROM MY USE. Search time: MEASURED |
 | Discovery | 40% more fitting places than my manual search (2 new on top of 5), Lower East Side, my own check on 2026-10-28 | FROM MY USE |
 | Model failures on the scoring call | 37.5% (3 of 8) → 0 of 23 after the root-cause fix | MEASURED |
 | Review quotes after the paraphrase-only rule | 0 quotation marks across 14 live calls | MEASURED |
 | Categories in the search path | 5: coffee, wine, art, sushi, pizza | — |
 
 - **MEASURED**: counted in a logged test run.
-- **CHECKED**: counted against a dated record, such as my pre-build Google Takeout list. The judgment of fit is mine.
 - **FROM MY USE**: from my own use of the app; it varies by category and neighborhood. Not a controlled test.
 
 ## How it works
